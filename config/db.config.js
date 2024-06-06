@@ -1,8 +1,9 @@
 // Import the dotenv package
+const Sequelize = require('sequelize');
+
 const dotenv = require('dotenv');
 dotenv.config();
 
-const Sequelize = require('sequelize');
 
 // Load database credentials from environment variables
 const sequelize = new Sequelize(

@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/connection');
+const sequelize = require('../config/db.config');
 
 class Department extends Model {}
 
@@ -42,5 +42,4 @@ Department.init(
 
 
 
-    }
-)
+   
