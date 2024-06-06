@@ -1,10 +1,10 @@
 const fs = require('fs');
-const { Department, Employee, Role } = require('./models/index');
+const { Department, Employee, Role } = require('../models/index');
 
 // Read JSON files
-const departments = JSON.parse(fs.readFileSync('./Department.json', 'utf8'));
-const employees = JSON.parse(fs.readFileSync('./Employee.json', 'utf8'));
-const roles = JSON.parse(fs.readFileSync('./Role.json', 'utf8'));
+const departments = JSON.parse(fs.readFileSync('./departments.json','utf-8'));
+const employees = JSON.parse(fs.readFileSync('./employees.json', 'utf8'));
+const roles = JSON.parse(fs.readFileSync('./roles.json', 'utf8'));
 
 // Function to insert department data
 const insertDepartments = async () => {
