@@ -21,10 +21,12 @@ Role.init(
     },
     department_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'department',
-        key: 'id'
+        key: 'id',
+        onDelete: 'CASCADE' // Cascade delete
+
       }
     }
   },

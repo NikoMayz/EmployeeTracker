@@ -1,7 +1,6 @@
 // Import required modules
 const express = require('express');
 const { sequelize } = require('./models');
-const runMigrations = require('./migrations/migrationrunner');
 const seedDatabase = require('./seeds/seed');
 const { startApp } = require('./utils/inquirer');
 
@@ -18,8 +17,7 @@ const startServer = async () => {
         await sequelize.authenticate();
         console.log('Connection to the database has been established successfully.');
 
-        // Run database migrations
-        await runMigrations();
+        
 
         // Seed the database
         await seedDatabase();

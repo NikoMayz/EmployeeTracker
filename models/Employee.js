@@ -20,18 +20,22 @@ Employee.init(
     },
     role_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'role',
-        key: 'id'
+        key: 'id',
+        onDelete: 'SET NULL',
+
       }
     },
     manager_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(30),
       allowNull: true,
       references: {
         model: 'employee',
-        key: 'id'
+        key: 'first_name',
+        onDelete: 'SET NULL', 
+
       }
     }
   },

@@ -15,7 +15,7 @@ Role.hasMany(Employee, { foreignKey: 'role_id', onDelete: 'CASCADE' });
 Employee.belongsTo(Role, { foreignKey: 'role_id' });
 
 // Sync all models
-sequelize.sync({ force: true })
+sequelize.sync({ force: false })
   .then(() => {
     console.log('Database & tables created!');
   })

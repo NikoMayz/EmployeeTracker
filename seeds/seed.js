@@ -2,9 +2,9 @@ const fs = require('fs');
 const { Department, Employee, Role } = require('../models/index');
 
 // Read JSON files
-const departments = JSON.parse(fs.readFileSync('./seeds/departments.json','utf-8'));
-const employees = JSON.parse(fs.readFileSync('./seeds/employees.json', 'utf8'));
-const roles = JSON.parse(fs.readFileSync('./seeds/roles.json', 'utf8'));
+const departments = JSON.parse(fs.readFileSync('seeds/departments.json','utf-8'));
+const employees = JSON.parse(fs.readFileSync('seeds/employees.json', 'utf8'));
+const roles = JSON.parse(fs.readFileSync('seeds/roles.json', 'utf8'));
 
 // Function to insert department data
 const insertDepartments = async () => {
@@ -68,7 +68,7 @@ const seedDatabase = async () => {
   await insertDepartments();
   await insertRoles();
   await insertEmployees();
-  console.log('Seed data insertion completed.');
+  console.log(insertDepartments, 'Seed data insertion completed.');
 };
 
 // Run seedDatabase function
