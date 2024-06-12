@@ -1,4 +1,6 @@
 const inquirer = require('inquirer');
+const sequelize = require('../config/db.config');
+
 const { Department, Employee, Role } = require('../models');
 
 // View all departments
@@ -260,20 +262,27 @@ const viewTotalUtilizedBudget = async () => {
                 message: 'Enter the department ID to view its total utilized budget:'
             }
         ]);
-        const totalBudget = await Employee.findAll({
-            attributes: [[sequelize.fn('SUM', sequelize.literal('"Role"."salary"')), 'totalBudget']],
-            include: [{
+        const totalBudget = await Department.findAll({
+            attributes: ['name', [sequelize.fn('SUM', sequelize.col('Roles.salary')), 'totalBudget']],
+            include: {
                 model: Role,
-                attributes: [],
-                where: { department_id: answer.department_id }
-            }],
+                attributes: [], // We do not need any additional attributes from the Role model
+                include: {
+                    model: Employee,
+                    attributes: [] // We do not need any additional attributes from the Employee model
+                }
+            },
+            group: ['Department.id'],
             raw: true // Get raw data to access the sum
         });
-
+        
         console.log(`Total utilized budget for department ${answer.department_id}: ${totalBudget[0].totalBudget}`);
-    } catch (err) {
-        console.error('Error viewing total utilized budget:', err);
-    }
+        } catch (err) {
+            console.error('Error viewing total utilized budget:', err);
+        }
+        
+        
+        
 };
 
 module.exports = {

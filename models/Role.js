@@ -25,7 +25,6 @@ Role.init(
       references: {
         model: 'department',
         key: 'id',
-        onDelete: 'CASCADE' // Cascade delete
 
       }
     }

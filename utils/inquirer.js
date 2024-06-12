@@ -126,6 +126,7 @@ const displayWelcomeMessage = () => {
 };
 
 const startApp = () => {
+    displayWelcomeMessage();
     inquirer.prompt([
         {
             type: 'list',
@@ -201,7 +202,8 @@ const startApp = () => {
     });
 };
 
-// Display the welcome message first
-displayWelcomeMessage();
+
 // Start the app
-startApp();
+module.exports = {
+    startApp
+};
