@@ -25,24 +25,6 @@ const insertDepartments = async () => {
   }
 };
 
-// Function to insert employee data
-const insertEmployees = async () => {
-  try {
-    for (const employee of employees) {
-      // Check if employee already exists
-      const existingEmployee = await Employee.findOne({ where: { first_name: employee.first_name, last_name: employee.last_name } });
-      if (!existingEmployee) {
-        // Insert employee if it doesn't exist
-        await Employee.create(employee);
-        console.log(`Employee "${employee.first_name} ${employee.last_name}" inserted.`);
-      } else {
-        console.log(`Employee "${employee.first_name} ${employee.last_name}" already exists. Skipping...`);
-      }
-    }
-  } catch (error) {
-    console.error('Error inserting employees:', error);
-  }
-};
 
 // Function to insert role data
 const insertRoles = async () => {
@@ -60,6 +42,24 @@ const insertRoles = async () => {
     }
   } catch (error) {
     console.error('Error inserting roles:', error);
+  }
+};
+// Function to insert employee data
+const insertEmployees = async () => {
+  try {
+    for (const employee of employees) {
+      // Check if employee already exists
+      const existingEmployee = await Employee.findOne({ where: { first_name: employee.first_name, last_name: employee.last_name } });
+      if (!existingEmployee) {
+        // Insert employee if it doesn't exist
+        await Employee.create(employee);
+        console.log(`Employee "${employee.first_name} ${employee.last_name}" inserted.`);
+      } else {
+        console.log(`Employee "${employee.first_name} ${employee.last_name}" already exists. Skipping...`);
+      }
+    }
+  } catch (error) {
+    console.error('Error inserting employees:', error);
   }
 };
 

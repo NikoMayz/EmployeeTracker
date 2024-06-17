@@ -33,9 +33,9 @@ Employee.init(
       references: {
         model: 'employee',
         key: 'id',
-
       }
-    }
+    },
+    
   },
   {
     sequelize,

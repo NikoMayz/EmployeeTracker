@@ -1,13 +1,22 @@
-const inquirer = require('inquirer');
 const sequelize = require('../config/db.config');
-
 const { Department, Employee, Role } = require('../models');
+const inquirer = require('inquirer');
+const Table = require('cli-table3');
 
 // View all departments
 const viewDepartments = async () => {
     try {
-        const departments = await Department.findAll();
-        console.table(departments.map(department => department.get({ plain: true })));
+        const departments = await Department.findAll({ raw: true });
+        const table = new Table({
+            head: ['ID', 'Name'],
+            colWidths: [10, 30]
+        });
+
+        departments.forEach(department => {
+            table.push([department.id, department.name]);
+        });
+
+        console.log(table.toString());
     } catch (err) {
         console.error('Error viewing departments:', err);
     }
@@ -16,8 +25,17 @@ const viewDepartments = async () => {
 // View all roles
 const viewRoles = async () => {
     try {
-        const roles = await Role.findAll();
-        console.table(roles.map(role => role.get({ plain: true })));
+        const roles = await Role.findAll({ raw: true });
+        const table = new Table({
+            head: ['ID', 'Title', 'Salary', 'Department ID'],
+            colWidths: [10, 20, 20, 20]
+        });
+
+        roles.forEach(role => {
+            table.push([role.id, role.title, role.salary, role.department_id]);
+        });
+
+        console.log(table.toString());
     } catch (err) {
         console.error('Error viewing roles:', err);
     }
@@ -26,10 +44,127 @@ const viewRoles = async () => {
 // View all employees
 const viewEmployees = async () => {
     try {
-        const employees = await Employee.findAll();
-        console.table(employees.map(employee => employee.get({ plain: true })));
+        const employees = await Employee.findAll({  
+            include: [{
+                model: Role,
+                attributes: ['salary']
+            }],
+            raw: true,
+            nest: true
+        })
+
+        const table = new Table({
+            head: ['ID', 'First Name', 'Last Name', 'Role ID', 'Manager ID', 'Role_Salary'],
+            colWidths: [10, 20, 20, 20, 20]
+        });
+
+        employees.forEach(employee => {
+            table.push([employee.id, employee.first_name, employee.last_name, employee.role_id, employee.manager_id, employee.role.salary]);
+        });
+
+        console.log(table.toString());
     } catch (err) {
         console.error('Error viewing employees:', err);
+    }
+};
+
+// View employees by manager
+const viewEmployeesByManager = async () => {
+    try {
+        const answer = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'manager_id',
+                message: 'Enter the manager ID to view their employees:'
+            }
+        ]);
+        const employees = await Employee.findAll({ where: { manager_id: answer.manager_id }, raw: true });
+        const table = new Table({
+            head: ['ID', 'First Name', 'Last Name', 'Role ID', 'Manager ID'],
+            colWidths: [10, 20, 20, 20, 20]
+        });
+
+        employees.forEach(employee => {
+            table.push([employee.id, employee.first_name, employee.last_name, employee.role_id, employee.manager_id]);
+        });
+
+        console.log(table.toString());
+    } catch (err) {
+        console.error('Error viewing employees by manager:', err);
+    }
+};
+
+// View employees by department
+const viewEmployeesByDepartment = async () => {
+    try {
+        const answer = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'department_id',
+                message: 'Enter the department ID to view its employees:'
+            }
+        ]);
+        const employees = await Employee.findAll({
+            include: {
+                model: Role,
+                where: { department_id: answer.department_id },
+                attributes: []
+            },
+            raw: true
+        });
+        const table = new Table({
+            head: ['ID', 'First Name', 'Last Name', 'Role ID', 'Manager ID'],
+            colWidths: [10, 20, 20, 20, 20]
+        });
+
+        employees.forEach(employee => {
+            table.push([employee.id, employee.first_name, employee.last_name, employee.role_id, employee.manager_id]);
+        });
+
+        console.log(table.toString());
+    } catch (err) {
+        console.error('Error viewing employees by department:', err);
+    }
+};
+
+// View total utilized budget of a department
+const viewTotalUtilizedBudget = async () => {
+    try {
+        const answer = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'department_id',
+                message: 'Enter the department ID to view its total utilized budget:'
+            }
+        ]);
+
+        const departmentId = answer.department_id;
+
+        const totalBudget = await Department.findAll({
+            where: { id: departmentId },
+            attributes: [
+                'name',
+                [sequelize.fn('SUM', sequelize.col('roles.salary')), 'totalBudget']
+            ],
+            include: {
+                model: Role,
+                attributes: [],
+                include: {
+                    model: Employee,
+                    attributes: []
+                }
+            },
+            group: ['Department.id'],
+            raw: true
+        });
+
+        if (totalBudget.length > 0) {
+            console.log(`Total utilized budget for department ${departmentId}: ${totalBudget[0].totalBudget}`);
+        } else {
+            console.log('No data found for the specified department ID.');
+        }
+    } catch (err) {
+        console.error('Error viewing total utilized budget:', err);
     }
 };
 
@@ -162,45 +297,6 @@ const updateEmployeeManager = async () => {
     }
 };
 
-// View employees by manager
-const viewEmployeesByManager = async () => {
-    try {
-        const answer = await inquirer.prompt([
-            {
-                type: 'input',
-                name: 'manager_id',
-                message: 'Enter the manager ID to view their employees:'
-            }
-        ]);
-        const employees = await Employee.findAll({ where: { manager_id: answer.manager_id } });
-        console.table(employees.map(employee => employee.get({ plain: true })));
-    } catch (err) {
-        console.error('Error viewing employees by manager:', err);
-    }
-};
-
-// View employees by department
-const viewEmployeesByDepartment = async () => {
-    try {
-        const answer = await inquirer.prompt([
-            {
-                type: 'input',
-                name: 'department_id',
-                message: 'Enter the department ID to view its employees:'
-            }
-        ]);
-        const employees = await Employee.findAll({
-            include: {
-                model: Role,
-                where: { department_id: answer.department_id }
-            }
-        });
-        console.table(employees.map(employee => employee.get({ plain: true })));
-    } catch (err) {
-        console.error('Error viewing employees by department:', err);
-    }
-};
-
 // Delete a department
 const deleteDepartment = async () => {
     try {
@@ -250,39 +346,6 @@ const deleteEmployee = async () => {
     } catch (err) {
         console.error('Error deleting employee:', err);
     }
-};
-
-// View total utilized budget of a department
-const viewTotalUtilizedBudget = async () => {
-    try {
-        const answer = await inquirer.prompt([
-            {
-                type: 'input',
-                name: 'department_id',
-                message: 'Enter the department ID to view its total utilized budget:'
-            }
-        ]);
-        const totalBudget = await Department.findAll({
-            attributes: ['name', [sequelize.fn('SUM', sequelize.col('Roles.salary')), 'totalBudget']],
-            include: {
-                model: Role,
-                attributes: [], // We do not need any additional attributes from the Role model
-                include: {
-                    model: Employee,
-                    attributes: [] // We do not need any additional attributes from the Employee model
-                }
-            },
-            group: ['Department.id'],
-            raw: true // Get raw data to access the sum
-        });
-        
-        console.log(`Total utilized budget for department ${answer.department_id}: ${totalBudget[0].totalBudget}`);
-        } catch (err) {
-            console.error('Error viewing total utilized budget:', err);
-        }
-        
-        
-        
 };
 
 module.exports = {
